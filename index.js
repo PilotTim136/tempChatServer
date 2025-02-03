@@ -4,6 +4,7 @@ const server = new WebSocket.Server({ port: 8080 });
 server.on('connection', (ws) => {
     ws.on('message', (message) => {
         const textMessage = message.toString();
+        console.log(textMessage);
         broadcast(textMessage);
     });
 
