@@ -1,7 +1,14 @@
 const WebSocket = require('ws');
-const server = new WebSocket.Server({ port: 8080 });
+const http = require('http');
+const express = require('express');
 
-server.on('connection', (ws) => {
+const app = express();
+
+const server = http.createServer(app);
+
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         const textMessage = message.toString();
         console.log(textMessage);
@@ -13,6 +20,8 @@ server.on('connection', (ws) => {
     });
 });
 
+
+
 function broadcast(message) {
     server.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
@@ -21,4 +30,14 @@ function broadcast(message) {
     });
 }
 
-console.log('Server is running on ws://localhost:8080');
+
+
+app.listen(8080, () => {
+    console.log("web running on port 8080");
+});
+
+app.get("/version", (req, res) => {
+    res.send("1.0");
+});
+
+console.log('listener running on port 8080');
