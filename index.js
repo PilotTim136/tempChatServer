@@ -8,6 +8,9 @@ const server = http.createServer(app);
 
 const wss = new WebSocket.Server({ server });
 
+const latestVersion = "1.0";
+const updateNeeded = false;
+
 wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         const textMessage = message.toString();
@@ -23,21 +26,27 @@ wss.on('connection', (ws) => {
 
 
 function broadcast(message) {
-    server.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
+    if (wss.clients.size > 0) {
+        wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                try {
+                    client.send(message);
+                } catch (err) {
+                    console.error('Error on broadcast: ', err);
+                }
+            }
+        });
+    }
 }
 
 
 
-app.listen(8080, () => {
+server.listen(8080, () => {
     console.log("web running on port 8080");
 });
 
 app.get("/version", (req, res) => {
-    res.send("1.0");
+    res.send({ver: latestVersion, needed: updateNeeded});
 });
 
 console.log('listener running on port 8080');
